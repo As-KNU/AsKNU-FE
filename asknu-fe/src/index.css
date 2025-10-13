@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-point: #5a7b62;     /* 사용자 말풍선 배경 */
+  --color-main2: #cde3d3;
+  --color-main3: #9fc2a7;
+  --color-black1: #111827;    /* 텍스트 기본(어두운 회색) */
+  --color-gray3: #9ca3af;     /* 보조 텍스트 */
+  --color-gray4: #6b7280;
+  --color-background: #f5f7fa;/* 페이지 배경 */
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+.mobile-frame {
+  width: 390px;
+  height: 844px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
