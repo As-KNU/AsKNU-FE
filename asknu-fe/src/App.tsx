@@ -5,7 +5,7 @@ import "./index.css";
 
 export default function App() {
   return (
-    <div className="flex justify-center items-start min-h-screen bg-gray-100 pt-6">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="mobile-frame">
         <BrowserRouter>
           <Routes>
