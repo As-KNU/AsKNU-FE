@@ -84,11 +84,12 @@ export default function ChatPage() {
   
     try {
       // 3️⃣ FastAPI /chat 요청 (프록시 사용 → /api/chat)
-      const res = await fetch("/api/chat", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: text }),
       });
+      
   
       const data = await res.json();
   
@@ -149,13 +150,13 @@ export default function ChatPage() {
                 alt="bot"
                 className="w-10 h-10 rounded-full border border-gray-200 object-cover"
               />
-              <div className="max-w-[78%] bg-gray-100 text-black1 rounded-2xl rounded-tl-md px-4 py-3 whitespace-pre-wrap break-words">
+              <div className="max-w-[78%] bg-gray-100 text-black1 rounded-2xl rounded-tl-md px-4 py-3 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                 <p className="text-[15px] leading-relaxed">{m.text}</p>
               </div>
             </div>
           ) : (
             <div key={m.id} className="flex justify-end mt-3">
-              <div className="max-w-[78%] bg-point text-white rounded-2xl rounded-tr-md px-4 py-3 break-words">
+              <div className="max-w-[78%] bg-point text-white rounded-2xl rounded-tr-md px-4 py-3 break-words [overflow-wrap:anywhere]">
                 <p className="text-[15px] leading-relaxed">{m.text}</p>
               </div>
             </div>
