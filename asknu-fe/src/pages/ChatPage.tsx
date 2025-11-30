@@ -14,11 +14,6 @@ const formatTime = (date: Date) => {
   return `${ap} ${hr}:${m}`;
 };
 
-// 분 스탬프 가져오기 (분 단위로만 비교)
-const getMinuteStamp = (date: Date) => {
-  return `${date.getHours()}:${date.getMinutes()}`;
-};
-
 const quickReplies = [
   "졸업 관련 문의",
   "전공/트랙 관련 문의",
