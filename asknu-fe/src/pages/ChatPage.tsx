@@ -46,7 +46,6 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const botTimerRef = useRef<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const lastTimeStampRef = useRef<string | null>(initialMinuteStamp);
 
   // 최초 진입 시 바로 하단으로 이동 (부드러운 스크롤 X)
   useEffect(() => {
