@@ -14,11 +14,6 @@ const formatTime = (date: Date) => {
   return `${ap} ${hr}:${m}`;
 };
 
-// 분 스탬프 가져오기 (분 단위로만 비교)
-const getMinuteStamp = (date: Date) => {
-  return `${date.getHours()}:${date.getMinutes()}`;
-};
-
 const quickReplies = [
   "졸업 관련 문의",
   "전공/트랙 관련 문의",
@@ -29,7 +24,6 @@ const quickReplies = [
 export default function ChatPage() {
   const now = new Date();
   const initialTimeStamp = formatTime(now);
-  const initialMinuteStamp = getMinuteStamp(now);
   
   const [messages, setMessages] = useState<Msg[]>([
     {
@@ -74,7 +68,7 @@ export default function ChatPage() {
   
     // 1️⃣ 사용자 메시지 추가
     const userMsg: Msg = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: "user",
       text,
     };
@@ -82,7 +76,7 @@ export default function ChatPage() {
     setInput("");
   
     // 2️⃣ 임시 bot "typing..." 메시지 추가 (로딩 표시)
-    const tempId = crypto.randomUUID();
+    const tempId = generateUUID();
     setMessages((prev) => [
       ...prev,
       { id: tempId, role: "bot", text: "답변을 생성 중입니다..." },
@@ -103,7 +97,7 @@ export default function ChatPage() {
         prev
           .filter((m) => m.id !== tempId)
           .concat({
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             role: "bot",
             text: data.answer || "서버 응답 오류가 발생했습니다.",
           })
@@ -114,7 +108,7 @@ export default function ChatPage() {
         prev
           .filter((m) => m.id !== tempId)
           .concat({
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             role: "bot",
             text: "서버와 통신 중 오류가 발생했습니다. \n다시 시도해주세요.",
           })
@@ -161,7 +155,7 @@ export default function ChatPage() {
             </div>
           ) : (
             <div key={m.id} className="flex justify-end mt-3">
-              <div className="max-w-[78%] bg-point text-white rounded-2xl rounded-tr-md px-4 py-3">
+              <div className="max-w-[78%] bg-point text-white rounded-2xl rounded-tr-md px-4 py-3 break-words">
                 <p className="text-[15px] leading-relaxed">{m.text}</p>
               </div>
             </div>
