@@ -46,7 +46,6 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const botTimerRef = useRef<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const lastTimeStampRef = useRef<string | null>(initialMinuteStamp);
 
   // 최초 진입 시 바로 하단으로 이동 (부드러운 스크롤 X)
   useEffect(() => {
@@ -70,58 +69,59 @@ export default function ChatPage() {
     };
   }, []);
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     if (!text.trim()) return;
-
-    const now = new Date();
-    const currentMinute = getMinuteStamp(now);
-    const newMessages: Msg[] = [];
-
-    // 분이 바뀌었으면 타임스탬프 추가
-    if (lastTimeStampRef.current !== currentMinute) {
-      newMessages.push({
-        id: generateUUID(),
-        role: "time",
-        text: formatTime(now),
-      });
-      lastTimeStampRef.current = currentMinute;
-    }
-
-    // 사용자 메시지 추가
-    newMessages.push({
-      id: generateUUID(),
+  
+    // 1️⃣ 사용자 메시지 추가
+    const userMsg: Msg = {
+      id: crypto.randomUUID(),
       role: "user",
       text,
-    });
-
-    setMessages((prev) => [...prev, ...newMessages]);
+    };
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
-
-    // bot 응답은 현재 messages 상태를 읽어 오지 않고, user 메시지 뒤에 append
-    setTimeout(() => {
-      const botNow = new Date();
-      const botMinute = getMinuteStamp(botNow);
-      const botMessages: Msg[] = [];
-
-      // 봇 응답 시에도 분이 바뀌었으면 타임스탬프 추가
-      if (lastTimeStampRef.current !== botMinute) {
-        botMessages.push({
-          id: generateUUID(),
-          role: "time",
-          text: formatTime(botNow),
-        });
-        lastTimeStampRef.current = botMinute;
-      }
-
-      botMessages.push({
-        id: generateUUID(),
-        role: "bot",
-        text: `"${text}" 문의 접수되었습니다. 잠시만 기다려주세요.`,
+  
+    // 2️⃣ 임시 bot "typing..." 메시지 추가 (로딩 표시)
+    const tempId = crypto.randomUUID();
+    setMessages((prev) => [
+      ...prev,
+      { id: tempId, role: "bot", text: "답변을 생성 중입니다..." },
+    ]);
+  
+    try {
+      // 3️⃣ FastAPI /chat 요청 (프록시 사용 → /api/chat)
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text }),
       });
-
-      setMessages((prev) => [...prev, ...botMessages]);
-    }, 400);
+  
+      const data = await res.json();
+  
+      // 4️⃣ 기존 "typing..." 메시지 제거 후 실제 답변 삽입
+      setMessages((prev) =>
+        prev
+          .filter((m) => m.id !== tempId)
+          .concat({
+            id: crypto.randomUUID(),
+            role: "bot",
+            text: data.answer || "서버 응답 오류가 발생했습니다.",
+          })
+      );
+    } catch (err) {
+      // 5️⃣ 에러 시 bot 메시지 출력
+      setMessages((prev) =>
+        prev
+          .filter((m) => m.id !== tempId)
+          .concat({
+            id: crypto.randomUUID(),
+            role: "bot",
+            text: "서버와 통신 중 오류가 발생했습니다. \n다시 시도해주세요.",
+          })
+      );
+    }
   };
+  
 
   return (
     <div className="h-full bg-white flex flex-col">
@@ -155,7 +155,7 @@ export default function ChatPage() {
                 alt="bot"
                 className="w-10 h-10 rounded-full border border-gray-200 object-cover"
               />
-              <div className="max-w-[78%] bg-gray-100 text-black1 rounded-2xl rounded-tl-md px-4 py-3 whitespace-pre-wrap">
+              <div className="max-w-[78%] bg-gray-100 text-black1 rounded-2xl rounded-tl-md px-4 py-3 whitespace-pre-wrap break-words">
                 <p className="text-[15px] leading-relaxed">{m.text}</p>
               </div>
             </div>
