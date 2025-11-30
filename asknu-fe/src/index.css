@@ -11,6 +11,7 @@
   --color-gray3: #9ca3af;
   --color-gray4: #6b7280;
   --color-background: #f5f7fa;
+  --vh: 1vh;
 }
 
 html,
@@ -22,7 +23,7 @@ body,
 
 .mobile-frame {
   width: 390px;
-  height: 754px;
+  height: calc(var(--vh) * 100);
   background: #fff;
   border: 1px solid #e5e7eb;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
