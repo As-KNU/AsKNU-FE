@@ -74,67 +74,78 @@ export default function MainPage() {
 
   return (
     <div className="h-full bg-white flex flex-col">
-        {/* 헤더 */}
-        <div className="px-6 pt-20 pb-3 text-center">
-          <div className="w-16 h-16 mx-auto rounded-full bg-white ring-2 ring-main3 grid place-items-center overflow-hidden">
-            <img src={logo} alt="logo" className="w-12 h-12 object-contain" />
-          </div>
-          <h1 className="mt-3 text-2xl font-semibold text-black1">
-            AsKNU에 문의하기
-          </h1>
+      {/* 헤더 */}
+      <div className="px-6 pt-8 pb-3 text-center">
+        <div className="w-16 h-16 mx-auto rounded-full bg-white grid place-items-center overflow-hidden">
+          <img src={logo} alt="logo" className="w-16 h-16 object-contain" />
         </div>
+        <h1 className="mt-3 text-2xl font-semibold text-black1">
+          AsKNU에 문의하기
+        </h1>
+      </div>
 
-        {/* 시간 */}
-        <div className="text-center text-gray3 text-sm">{timeText}</div>
+      {/* 시간 */}
+      <div className="text-center text-gray3 text-sm">{timeText}</div>
 
-        {/* 대화 (프레임이 스크롤 컨테이너이므로 이 영역은 패딩만) */}
-        <div
-          className="px-3 sm:px-4 pt-3 pb-77"
-        >
-          {messages.map((m) =>
-            m.role === "bot" ? (
-              <div key={m.id} className="flex gap-2.5 items-start mt-3">
-                <img
-                  src={logo}
-                  alt="bot"
-                  className="w-8 h-8 rounded-full border border-gray-200 object-cover"
-                />
-                <div className="max-w-[78%] bg-gray-100 text-black1 rounded-2xl rounded-tl-md px-4 py-3 whitespace-pre-wrap">
-                  <p className="text-[15px] leading-relaxed">{m.text}</p>
-                </div>
+      {/* 메시지 영역: 이곳만 스크롤 */}
+      <div className="flex-1 overflow-y-auto px-3 sm:px-4 pt-3 pb-4">
+        {messages.map((m) =>
+          m.role === "bot" ? (
+            <div key={m.id} className="flex gap-2.5 items-start mt-3">
+              <img
+                src={logo}
+                alt="bot"
+                className="w-10 h-10 rounded-full border border-gray-200 object-cover"
+              />
+              <div className="max-w-[78%] bg-gray-100 text-black1 rounded-2xl rounded-tl-md px-4 py-3 whitespace-pre-wrap">
+                <p className="text-[15px] leading-relaxed">{m.text}</p>
               </div>
-            ) : (
-              <div key={m.id} className="flex justify-end mt-3">
-                <div className="max-w-[78%] bg-point text-white rounded-2xl rounded-tr-md px-4 py-3">
-                  <p className="text-[15px] leading-relaxed">{m.text}</p>
-                </div>
+            </div>
+          ) : (
+            <div key={m.id} className="flex justify-end mt-3">
+              <div className="max-w-[78%] bg-point text-white rounded-2xl rounded-tr-md px-4 py-3">
+                <p className="text-[15px] leading-relaxed">{m.text}</p>
               </div>
-            )
-          )}
-          <div ref={bottomRef} />
+            </div>
+          )
+        )}
 
-          {/* 퀵 리플라이 */}
-          {!hasUserMessage && (
-  <div className="mt-3 flex flex-wrap gap-3">
-    {quickReplies.map((q) => (
-      <button
-        key={q}
-        onClick={() => send(q)}
-        className="px-4 py-2 rounded-2xl bg-white border border-gray-200 text-gray-500 text-[15px] hover:bg-gray-50 active:scale-[0.99] transition"
+        <div ref={bottomRef} />
+      </div>
+
+      {/* 하단 고정 섹션: FAQ 카드 + 입력창 */}
+      <div 
+        className="sticky left-0 right-0 bg-white z-10"
+        style={{ 
+          bottom: '0px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)'
+        }}
       >
-        {q}
-      </button>
-    ))}
-  </div>
-)}
-        </div>
+        {/* FAQ 카드: 첫 사용자 채팅 이후 숨김 */}
+        {!hasUserMessage && (
+          <div className="px-3 sm:px-4 py-3">
+            <div className="flex flex-wrap gap-3">
+              {quickReplies.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => send(q)}
+                  className="px-4 py-2 rounded-2xl bg-white border border-gray-200 text-gray-500 text-[15px] hover:bg-gray-50 active:scale-[0.99] transition"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* 입력창: 프레임 하단 sticky 고정 */}
+        {/* 입력창 */}
         <form
-          className="sticky bottom-0 bg-white sm:px-4"
+          className="px-3 sm:px-4 py-3"
           onSubmit={(e) => {
             e.preventDefault();
-            send(input);
+            if (input.trim()) {
+              send(input);
+            }
           }}
         >
           <div className="relative">
@@ -146,8 +157,14 @@ export default function MainPage() {
             />
             <button
               type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full grid place-items-center bg-point text-white hover:bg-[#4C6953] active:scale-95 transition"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full grid place-items-center bg-point text-white hover:bg-[#4C6953] active:scale-95 transition z-20 pointer-events-auto"
               aria-label="send"
+              onClick={(e) => {
+                e.preventDefault();
+                if (input.trim()) {
+                  send(input);
+                }
+              }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M4 12l15-7-3.8 7 3.8 7-15-7z" fill="currentColor" />
@@ -156,5 +173,6 @@ export default function MainPage() {
           </div>
         </form>
       </div>
+    </div>
   );
 }
