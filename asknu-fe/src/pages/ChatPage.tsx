@@ -14,6 +14,11 @@ const formatTime = (date: Date) => {
   return `${ap} ${hr}:${m}`;
 };
 
+// 분 스탬프 가져오기 (분 단위로만 비교)
+const getMinuteStamp = (date: Date) => {
+  return `${date.getHours()}:${date.getMinutes()}`;
+};
+
 const quickReplies = [
   "졸업 관련 문의",
   "전공/트랙 관련 문의",
@@ -24,6 +29,7 @@ const quickReplies = [
 export default function ChatPage() {
   const now = new Date();
   const initialTimeStamp = formatTime(now);
+  const initialMinuteStamp = getMinuteStamp(now);
   
   const [messages, setMessages] = useState<Msg[]>([
     {
@@ -40,6 +46,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const botTimerRef = useRef<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastTimeStampRef = useRef<string | null>(initialMinuteStamp);
 
   // 최초 진입 시 바로 하단으로 이동 (부드러운 스크롤 X)
   useEffect(() => {
@@ -63,16 +70,55 @@ export default function ChatPage() {
     };
   }, []);
 
+  // 1분마다 타임스탬프 체크 및 추가
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const currentMinute = getMinuteStamp(now);
+      
+      // 분이 바뀌었으면 타임스탬프 추가
+      if (lastTimeStampRef.current !== currentMinute) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: generateUUID(),
+            role: "time",
+            text: formatTime(now),
+          },
+        ]);
+        lastTimeStampRef.current = currentMinute;
+      }
+    }, 1000); // 1초마다 체크
+
+    return () => clearInterval(interval);
+  }, []);
+
   const send = async (text: string) => {
     if (!text.trim()) return;
   
+    const now = new Date();
+    const currentMinute = getMinuteStamp(now);
+    const newMessages: Msg[] = [];
+
+    // 분이 바뀌었으면 타임스탬프 추가
+    if (lastTimeStampRef.current !== currentMinute) {
+      newMessages.push({
+        id: generateUUID(),
+        role: "time",
+        text: formatTime(now),
+      });
+      lastTimeStampRef.current = currentMinute;
+    }
+
     // 1️⃣ 사용자 메시지 추가
     const userMsg: Msg = {
       id: generateUUID(),
       role: "user",
       text,
     };
-    setMessages((prev) => [...prev, userMsg]);
+    newMessages.push(userMsg);
+    
+    setMessages((prev) => [...prev, ...newMessages]);
     setInput("");
   
     // 2️⃣ 임시 bot "typing..." 메시지 추가 (로딩 표시)
